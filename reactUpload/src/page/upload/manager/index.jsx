@@ -26,12 +26,12 @@ const Manager = () => {
     //获取全部文件
     const getAllFile = async () => {
         const token = window.localStorage.getItem('token')
-        window.location.assign('http://localhost:3001/file/downloadall/' + token)
+        window.location.assign('http://122.152.193.177:3001/file/downloadall/' + token)
     }
 
     const getOneFile = async (name) => {
         const token = window.localStorage.getItem('token')
-        window.location.assign('http://localhost:3001/file/download/' + name + '/' + token)
+        window.location.assign('http://122.152.193.177:3001/file/download/' + name + '/' + token)
     }
 
     //修改文件名称的接口
