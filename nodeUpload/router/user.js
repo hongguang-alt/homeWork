@@ -116,7 +116,11 @@ router.post('/changeFile', async ctx => {
 //作业未上交名单
 router.get('/noFileName', async ctx => {
     let res = await Student.find({
-        fileName: '' || null
+        $or: [{
+            fileName: ''
+        }, {
+            fileName: null
+        }]
     })
     let data = []
     res.map(item => {
