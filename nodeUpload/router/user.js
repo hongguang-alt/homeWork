@@ -77,14 +77,16 @@ router.get('/fileName', async ctx => {
     let res = await fileName.find({})
     const {
         content,
-        format
+        format,
+        detail
     } = res[0]
     ctx.body = {
         status: '200',
         msg: '获取成功',
         data: {
             content,
-            format
+            format,
+            detail
         }
     }
 })
@@ -93,7 +95,8 @@ router.get('/fileName', async ctx => {
 router.post('/changeFile', async ctx => {
     const {
         content,
-        format
+        format,
+        detail
     } = ctx.request.body
     if (!content || !format) {
         return ctx.body = {
@@ -103,7 +106,8 @@ router.post('/changeFile', async ctx => {
     } else {
         await fileName.updateOne({}, {
             content,
-            format
+            format,
+            detail
         })
         ctx.body = {
             status: '200',
@@ -167,7 +171,7 @@ router.get('/uploadName', async ctx => {
         name: userInfo.name
     })
     ctx.body = {
-        status: 200,
+        status: "200",
         msg: '获取上传文件名称成功',
         data: {
             fileName: res.fileName

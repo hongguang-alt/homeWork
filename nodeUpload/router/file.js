@@ -94,7 +94,7 @@ router.get('/downloadall/:name/:token', async (ctx) => {
         const reader = fs.createReadStream(`upload/${item}`)
         await zip.file(item, reader);
     })
-    let reslute = await asyncRes(zip)
+    let reslute = await asyncRes(zip, ZIP_NAME)
     if (reslute) {
         const pathUrl = path.join(ZIP, ZIP_NAME)
         await ctx.attachment(pathUrl)
@@ -121,8 +121,8 @@ router.get('/deleteall', async ctx => {
         uploadFiles.forEach(async item => {
             await fs.unlink(`upload/${item}`, () => {})
         })
-        await fs.unlink(path.join(ZIP, ZIP_NAME), (err) => {
-            console.log(err, '删除压缩包出错')
+        loadFiles.forEach(async item => {
+            await fs.unlink(`${ZIP}/${item}`, () => {})
         })
     }
     return ctx.body = {
@@ -150,20 +150,20 @@ router.get('/delete/:name', async ctx => {
 router.post('/changeName', async ctx => {
     const {
         sid,
-        name
+        name: newName
     } = ctx.request.body
     let res = await Student.findOne({
         sid: sid
     })
     let files = fs.readdirSync('upload')
-    let newName = name + '.' + res.fileName.split('.').pop()
+    // let newName = name + '.' + res.fileName.split('.').pop()
     files.forEach(async item => {
         if (item === res.fileName) {
             try {
                 await fs.renameSync(`upload/${item}`, `upload/${newName}`)
             } catch (e) {
                 ctx.body = {
-                    status: 201,
+                    status: "201",
                     msg: '修改文件名失败'
                 }
             }
