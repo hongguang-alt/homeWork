@@ -75,7 +75,6 @@ router.post('/password', async ctx => {
 //获取文件命名信息
 router.get('/fileName', async ctx => {
     let res = await fileName.find({})
-    console.log(res)
     const {
         content,
         format
@@ -161,5 +160,18 @@ router.get('/detail', async ctx => {
     }
 })
 
-
+//获取上传的文件名称
+router.get('/uploadName', async ctx => {
+    let userInfo = jwt.verify(ctx.request.header.authorization.split(' ')[1], secret)
+    let res = await Student.findOne({
+        name: userInfo.name
+    })
+    ctx.body = {
+        status: 200,
+        msg: '获取上传文件名称成功',
+        data: {
+            fileName: res.fileName
+        }
+    }
+})
 module.exports = router.routes()

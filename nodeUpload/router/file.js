@@ -7,7 +7,6 @@ const jsZip = require('jszip')
 const jwt = require('jsonwebtoken')
 const {
     ZIP,
-    ZIP_NAME,
     secret
 } = require('../config')
 const Student = require('../model/student')
@@ -32,7 +31,7 @@ router.post('/uploadfile', async (ctx, next) => {
     }
 
     //正式提交上传文件
-    const file = ctx.request.files.file //获得上传文件
+    const file = ctx.request.files.file
     //存放在临时目录上
     const reader = fs.createReadStream(file.path)
     let filePath = path.join(__dirname, '../upload' + `/${file.name}`)
@@ -74,8 +73,9 @@ router.get('/download/:name/:token', async (ctx) => {
 })
 
 //下载全部的接口，文件处理,对于token的值进行解析
-router.get('/downloadall/:token', async (ctx) => {
+router.get('/downloadall/:name/:token', async (ctx) => {
     let userInfo = jwt.verify(ctx.params.token, secret)
+    let ZIP_NAME = ctx.params.name
     let res = await Student.findOne({
         'sid': userInfo.sid
     })
@@ -145,5 +145,40 @@ router.get('/delete/:name', async ctx => {
         msg: '删除成功'
     }
 })
+
+//修改文件名称的接口
+router.post('/changeName', async ctx => {
+    const {
+        sid,
+        name
+    } = ctx.request.body
+    let res = await Student.findOne({
+        sid: sid
+    })
+    let files = fs.readdirSync('upload')
+    let newName = name + '.' + res.fileName.split('.').pop()
+    files.forEach(async item => {
+        if (item === res.fileName) {
+            try {
+                await fs.renameSync(`upload/${item}`, `upload/${newName}`)
+            } catch (e) {
+                ctx.body = {
+                    status: 201,
+                    msg: '修改文件名失败'
+                }
+            }
+        }
+    })
+    await Student.updateOne({
+        sid
+    }, {
+        fileName: newName
+    })
+    ctx.body = {
+        status: '200',
+        msg: '修改文件名成功'
+    }
+})
+
 
 module.exports = router.routes()
