@@ -55,3 +55,15 @@ export const deteleOne = ({
 }) => {
     return axios.get('/file/delete/' + name)
 }
+
+//获取上传的文件名称
+export const getUploadName = () => {
+    return axios.get('/user/uploadName')
+}
+
+//修改文件名称的接口
+export const changefileName = (value)=>{
+    return axios.post('/file/changeName',{
+        ...value
+    })
+}

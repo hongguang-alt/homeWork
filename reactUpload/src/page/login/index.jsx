@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Layout, Card, Form, Input, Button, message, Spin } from 'antd';
+import { Layout, Card, Form, Input, Button, Spin } from 'antd';
 import { login } from '../../axios/api'
 const { Header, Footer, Content } = Layout;
 

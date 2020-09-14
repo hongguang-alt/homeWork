@@ -1,14 +1,118 @@
 import React, { useEffect, useState } from 'react'
 import moment from 'moment'
-import { Card, Button, Table, Space, Modal, Form, Input, message } from 'antd'
-import { noHomeWorkListName, changeFileFormat, detailList, deleteAll, deteleOne } from '../../../axios/api'
+import { URL } from '../../../config'
+import { Card, Button, Table, Space, Modal, Form, Input, message, Empty } from 'antd'
+import { noHomeWorkListName, changeFileFormat, detailList, deleteAll, deteleOne, changefileName } from '../../../axios/api'
 const { confirm } = Modal;
 
 
+const CollectionCreateForm = ({ visible, onCreate, onCancel, initName }) => {
+    const [editform] = Form.useForm();
+    useEffect(() => {
+        if (editform) {
+            editform.setFieldsValue({
+                name: initName
+            })
+        }
+    })
+    return (
+        <Modal
+            visible={visible}
+            destroyOnClose={true}
+            title="重命名"
+            okText="确定"
+            cancelText="取消"
+            onCancel={onCancel}
+            onOk={() => {
+                editform
+                    .validateFields()
+                    .then((values) => {
+                        // editform.resetFields();
+                        onCreate(values);
+                    })
+                    .catch((info) => {
+                        console.log('验证失败', info);
+                    });
+            }}
+        >
+            <Form
+                form={editform}
+                name="form_in_modal"
+                initialValues={{
+                    name: initName,
+                }}
+            >
+                <Form.Item
+                    name="name"
+                    label="文件名称"
+                    rules={[
+                        {
+                            required: true,
+                            message: '请输入重名名的文件名称',
+                        },
+                    ]}
+                >
+                    <Input />
+                </Form.Item>
+            </Form>
+        </Modal>
+    );
+};
+
+
+const ReNameForm = ({ visible, onCreate, onCancel }) => {
+    const [editform] = Form.useForm();
+    return (
+        <Modal
+            visible={visible}
+            destroyOnClose={true}
+            title="导出文件名称"
+            okText="确定"
+            cancelText="取消"
+            onCancel={onCancel}
+            onOk={() => {
+                editform
+                    .validateFields()
+                    .then((values) => {
+                        editform.resetFields();
+                        onCreate(values);
+                    })
+                    .catch((info) => {
+                        console.log('验证失败', info);
+                    });
+            }}
+        >
+            <Form
+                form={editform}
+                name="form_in_modal"
+                initialValues={{
+                    name: '网络工程171.zip',
+                }}
+            >
+                <Form.Item
+                    name="name"
+                    label="文件名称"
+                    rules={[
+                        {
+                            required: true,
+                            message: '请输入重名名的文件名称',
+                        },
+                    ]}
+                >
+                    <Input />
+                </Form.Item>
+            </Form>
+        </Modal>
+    );
+};
 
 const Manager = () => {
     const [noHomeWorkList, setNoHomeWorkList] = useState([])
     const [dataSource, setDataSource] = useState([])
+    const [editVisible, setEditVisible] = useState(false)
+    const [initName, setInitName] = useState('')
+    const [changeSid, setChangeSid] = useState('')
+    const [reNameVisible, setReNameVisible] = useState(false)
     const [form] = Form.useForm()
 
 
@@ -20,18 +124,18 @@ const Manager = () => {
     const onFinish = (value) => {
         toChangeFileFormat(value)
         form.resetFields()
-
     }
 
     //获取全部文件
-    const getAllFile = async () => {
+    const getAllFile = async (name) => {
         const token = window.localStorage.getItem('token')
-        window.location.assign('http://122.152.193.177:3001/file/downloadall/' + token)
+        window.location.assign(`${URL}/file/downloadall/` + name + '/' + token)
     }
 
+    //导出单个文件
     const getOneFile = async (name) => {
         const token = window.localStorage.getItem('token')
-        window.location.assign('http://122.152.193.177:3001/file/download/' + name + '/' + token)
+        window.location.assign(`${URL}/file/download/` + name + '/' + token)
     }
 
     //修改文件名称的接口
@@ -115,6 +219,11 @@ const Manager = () => {
                 return <Space size="middle">
                     <a onClick={() => toDeleteData(record)}>删除</a>
                     <a onClick={() => {
+                        setEditVisible(true)
+                        setInitName(record.fileName)
+                        setChangeSid(record.sid)
+                    }}>编辑</a>
+                    <a onClick={() => {
                         getOneFile(record.fileName)
                     }}>导出</a>
                 </Space>
@@ -145,7 +254,7 @@ const Manager = () => {
             onOk: async () => {
                 try {
                     const { status, msg } = await deteleOne({ name: record.fileName })
-                    if (status == '200') {
+                    if (status === '200') {
                         message.success('删除文档成功')
                         getDetailList()
                         getNoHomeWorkList()
@@ -189,15 +298,36 @@ const Manager = () => {
         });
     }
 
+    //修改文件名称的表单
+    const onCreate = async (value) => {
+        let newValue = {
+            ...value,
+            sid: changeSid
+        }
+        try {
+            let { status, msg } = await changefileName(newValue)
+            if (status === '200') {
+                message.success(msg)
+                setEditVisible(false)
+                getDetailList()
+            }
+        } catch (e) {
+            message.error(e)
+        }
+    }
+    const onReNameCreate = (value) => {
+        getAllFile(value.name)
+        setReNameVisible(false)
+    }
     return (
         <React.Fragment>
             <h3>管理作业</h3>
             <Card title='作业未上交名单' style={{ marginBottom: '50px' }} >
                 <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                     {
-                        Array.isArray(noHomeWorkList) ? noHomeWorkList.map((item, index) => {
-                            return <div key={index} style={{ width: '50px', textAlign: 'center', color: 'red' }}>{item}</div>
-                        }) : null
+                        Array.isArray(noHomeWorkList) && noHomeWorkList.length !== 0 ? noHomeWorkList.map((item, index) => {
+                            return <div key={index} style={{ width: '50px', textAlign: 'center', bold: 'bolder' }}>{item}</div>
+                        }) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
                     }
                 </div>
             </Card>
@@ -224,6 +354,12 @@ const Manager = () => {
                         >
                             <Input />
                         </Form.Item>
+                        <Form.Item
+                            label="详细说明"
+                            name="detail"
+                        >
+                            <Input.TextArea />
+                        </Form.Item>
                         <Form.Item {...tailLayout}>
                             <Button type="primary" htmlType="submit">
                                 提交
@@ -234,11 +370,26 @@ const Manager = () => {
             </Card>
             <Card title='作业列表' extra={
                 <div>
-                    <Button type='primary' style={{ fontSize: "14px" }} onClick={getAllFile}>全部导出</Button>
+                    <Button type='primary' style={{ fontSize: "14px" }} onClick={() => { setReNameVisible(true) }}>全部导出</Button>
                     <Button type='primary' style={{ fontSize: "14px", marginLeft: '10px' }} onClick={toDeleteAll}>清空数据</Button>
                 </div>}>
                 <Table dataSource={dataSource} columns={columns} />
             </Card>
+            <CollectionCreateForm
+                visible={editVisible}
+                onCreate={onCreate}
+                onCancel={() => {
+                    setEditVisible(false);
+                }}
+                initName={initName}
+            />
+            <ReNameForm
+                visible={reNameVisible}
+                onCreate={onReNameCreate}
+                onCancel={() => {
+                    setReNameVisible(false);
+                }}
+            />
         </React.Fragment>
     )
 }

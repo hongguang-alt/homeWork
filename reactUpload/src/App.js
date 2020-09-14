@@ -1,7 +1,7 @@
 import React from 'react';
 import Login from './page/login'
 import Upload from './page/upload'
-import {BrowserRouter,HashRouter , Switch ,Route } from 'react-router-dom'
+import { HashRouter , Switch ,Route } from 'react-router-dom'
 import 'antd/dist/antd.css'
 
 function App() {

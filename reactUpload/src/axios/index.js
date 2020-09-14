@@ -1,7 +1,10 @@
 import axios from 'axios'
+import {
+    URL
+} from '../config'
 
 //设置axios的基本配置
-axios.defaults.baseURL = 'http://122.152.193.177:3001';
+axios.defaults.baseURL = URL;
 
 // 添加请求拦截器
 axios.interceptors.request.use(function (config) {

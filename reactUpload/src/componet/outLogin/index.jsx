@@ -4,12 +4,13 @@ import { DownOutlined } from '@ant-design/icons';
 import { withRouter } from 'react-router'
 import jwt from 'jsonwebtoken'
 import { useState, useEffect } from 'react';
+import { sercet } from '../../config'
 
 const OutLogin = (props) => {
     const [name, setName] = useState('')
 
     useEffect(() => {
-        let { name } = jwt.verify(window.localStorage.getItem('token'), 'yinxiu')
+        let { name } = jwt.verify(window.localStorage.getItem('token'), sercet)
         setName(name)
     })
     //退出的函数

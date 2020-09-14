@@ -6,9 +6,9 @@ import UploadWork from './uploadWork'
 import OutLogin from '../../componet/outLogin'
 import Manager from './manager'
 import { useEffect } from 'react';
+import { sercet } from '../../config'
 import jwt from 'jsonwebtoken'
 const { Header, Content, Sider } = Layout;
-
 
 
 
@@ -17,7 +17,7 @@ const Upload = () => {
     const [role, setRole] = useState('student')
 
     useEffect(() => {
-        let { role } = jwt.verify(window.localStorage.getItem('token'), 'yinxiu')
+        let { role } = jwt.verify(window.localStorage.getItem('token'), sercet)
         setRole(role)
     })
     const getRight = () => {
