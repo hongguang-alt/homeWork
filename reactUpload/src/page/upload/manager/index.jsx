@@ -312,7 +312,8 @@ const Manager = () => {
                 getDetailList()
             }
         } catch (e) {
-            message.error(e)
+            // message.error(e)
+            console.log(e)
         }
     }
     const onReNameCreate = (value) => {
